@@ -1,8 +1,7 @@
-  A direct implementation of persistent delimited continuations
-	       for byte- and native-code OCaml
-		    The delimcc library
+A direct implementation of persistent delimited continuations for byte- and native-code OCaml The delimcc library
+=================================================================================================================
 
-OVERVIEW:
+## OVERVIEW
 
   The library delimcc implements multi-prompt delimited control operators
 for byte- and native-code OCaml. The library implements the superset 
@@ -58,7 +57,7 @@ http://okmij.org/ftp/continuations/
 The library is distributed under the MIT license.
 
 
-INSTALLATION FOR UNIX (including Linux, and Cygwin):
+## INSTALLATION FOR UNIX (including Linux, and Cygwin):
 
 Unless you are on i386 or amd64 platform, you need a copy of the OCaml source
 distribution to compile this library. This is because we need some
@@ -72,7 +71,7 @@ ocaml-byterun-3.11/ (the latter supports OCaml 3.12.0 too).
 Please examine the Makefile and adjust OCAMLINCLUDES and OCAMLBIN 
 variables if necessary. Please see the Makefile for available targets.
 
-INSTALLATION FOR MacOS X
+## INSTALLATION FOR MacOS X
 
 Paul Snively reports (caml-list, Apr 2013) of compiling delimcc on 
 Mac OS X 10.6.8:
@@ -88,25 +87,25 @@ stacks-native.c.  Apple's GCC 4.2.1 for Mac OS X 10.6.8 or clang 3.2
 lead to problems.
 
 
-INSTALLATION FOR MS WINDOWS:
+## INSTALLATION FOR MS WINDOWS:
   Not tested. 
 
 
-USAGE:
+## USAGE
 
-Byte-code:
-
+### Byte-code
+```
   ocamlc -o myprogram delimcc.cma <the .cmo files for myprogram>
-
-If you compile the top-level (see `make top'), you can use delimited
+```
+If you compile the top-level (see `make top`), you can use delimited
 continuation operators in interactive OCaml sessions.
 
 For MacOS, be sure to use ocamlc rather than ocamlc.opt for linking.
 
-Native code:
-
+### Native code
+```
   ocamlopt -o myprogram -cclib -L. delimcc.cmxa <the .cmx files for myprogram>
-
+```
 assuming that libdelimccopt.a and dlldelimccopt.so are in the current
 directory. Otherwise, "-cclib -L." has to be modified to include the
 path to the libraries.
@@ -114,7 +113,7 @@ path to the libraries.
 For reference, see the targets testd0 and testd0opt in the Makefile.
 
 
-USAGE NOTES:
+## USAGE NOTES
 
 One should keep in mind the fundamental limitation of native-code
 delimited continuations -- the limitation that also holds for Scheme
@@ -131,14 +130,9 @@ frames in captured continuations, and throws a run-time error. Such a
 behavior of delimcc is consistent with the behavior of native-code
 Scheme systems.
 
+## MANIFEST
 
-
-VERSION: August 2013
-
-
-MANIFEST
-
-
+```
 Makefile			How to build it all
 META				Findlib description
 
@@ -193,56 +187,47 @@ bench_coroutine.ml		The co-routine benchmark by Xavier Leroy
 				from his ocaml-callcc library: comparing
 				undelimited and delimited continuations in
 				performance and expressivity
+```
 
+### CHANGES since the August 2010 version of the library
+- incorporating Christophe Deleuze's patches and suggestions
+  about using caml_alloc_dependent_memory in native code
+  delimcc. GC is able to better adjust its speed of running
+  finalizers, resulting in fewer GC cycles and less, sometimes
+  significantly less, running time.
+- A new benchmark: lightweight concurrency library and
+  the concurrent Eratosthenes sieve. It is based on the code
+  kindly sent by Christophe Deleuze.
+- Small adjustments to the code, making it more understandable
+- Added notes on compiling and using delimcc on MacOS X and with
+  later versions of GCC.
 
-CHANGES since the August 2010 version of the library:
-  -- incorporating Christophe Deleuze's patches and suggestions
-     about using caml_alloc_dependent_memory in native code
-     delimcc. GC is able to better adjust its speed of running
-     finalizers, resulting in fewer GC cycles and less, sometimes
-     significantly less, running time.
-  -- A new benchmark: lightweight concurrency library and
-     the concurrent Eratosthenes sieve. It is based on the code
-     kindly sent by Christophe Deleuze.
-  -- Small adjustments to the code, making it more understandable
-  -- Added notes on compiling and using delimcc on MacOS X and with
-     later versions of GCC.
+### CHANGES since the April 2010 version of the library
+- the first release of the native code implementation, on i386 and amd64
+  platforms
+- even more simplified implementation
 
-CHANGES since the April 2010 version of the library:
-  -- the first release of the native code implementation, on i386 and amd64
-     platforms
+### CHANGES since the July 2008 version of the library
+- greatly modified and simplified implementation. It is about 10% faster, 
+  taking less memory. According to memory_leaked_plugged test,
+  the size of the stored continuation decreased from 437 bytes 
+  to 387 bytes in this version.
+- new exported function shift0, capturing a frequent pattern
+- added micro-benchmarks
 
-  -- even more simplified implementation
+### CHANGES since the April 2008 version of the library
+- new primitive, push_prompt_subcont, to push a captured continuation
+  along with the control delimiter. The primitive is used to implement
+  shift without leaking memory. See the test memory_leak.ml.
+- many optimizations, which reduce the size of captured continuations
 
-
-CHANGES since the July 2008 version of the library:
-  -- greatly modified and simplified implementation. It is about 10% faster, 
-     taking less memory. According to memory_leaked_plugged test,
-     the size of the stored continuation decreased from 437 bytes 
-     to 387 bytes in this version.
-
-  -- new exported function shift0, capturing a frequent pattern
-
-  -- added micro-benchmarks
-
-
-CHANGES since the April 2008 version of the library:
-  -- new primitive, push_prompt_subcont, to push a captured continuation
-     along with the control delimiter. The primitive is used to implement
-     shift without leaking memory. See the test memory_leak.ml.
-
-  -- many optimizations, which reduce the size of captured continuations
-
-
-CHANGES since the 2006 version of the library:
-  -- persistent, twice delimited continuations
-
-  -- addition of shift, control, abort, is_prompt_set
-     and various debugging facilities (of which the most notable
-     is show_val, to describe the structure of an OCaml value).
-     The operations shift and control are implemented solely in terms
-     of the basic take_subcont and push_subcont and included in the
-     library merely for convenience. On the other hand, abort -- although
-     too expressible in terms of take_subcont -- is implemented natively
-     for efficiency. Now abort is literally raise.
-
+### CHANGES since the 2006 version of the library
+- persistent, twice delimited continuations
+- addition of shift, control, abort, is_prompt_set
+  and various debugging facilities (of which the most notable
+  is show_val, to describe the structure of an OCaml value).
+  The operations shift and control are implemented solely in terms
+  of the basic take_subcont and push_subcont and included in the
+  library merely for convenience. On the other hand, abort -- although
+  too expressible in terms of take_subcont -- is implemented natively
+  for efficiency. Now abort is literally raise.
