@@ -108,7 +108,7 @@ install:
 	if test -f delimcc.cmxa; then cp delimcc.cmxa $(LIBDIR); fi
 
 findlib-install: META dlldelimcc.so libdelimcc.a delimcc.cma delimcc.cmi \
-	dlldelimccopt.so libdelimccopt.a delimcc.cmxa delimcc.a delimcc.mli
+	dlldelimccopt.so libdelimccopt.a delimcc.cmxa delimcc.cmx delimcc.a delimcc.mli
 	$(OCAMLFIND) install $(OCAMLFIND_INSTFLAGS) delimcc $^
 
 
