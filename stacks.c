@@ -55,10 +55,12 @@
   native-code OCaml, see stacks-native.c. See the latter file for
   justification.
 
-  $Id: stacks.c,v 1.5 2006/02/02 01:29:28 oleg Exp $
+  $Id: stacks.c,v 1.1 2017/03/23 10:53:25 oleg Exp oleg $
 
  *------------------------------------------------------------------------
  */
+
+#define CAML_INTERNALS
 
 #include <string.h>
 #include "misc.h"
@@ -131,7 +133,7 @@ value dbg_print_trapsp(const value k)
   const ptrdiff_t t = Long_val(k);
   value * const captured_k = caml_stack_high - t;
   print_gl_stack("dbg_print_trapsp");
-  fprintf(stderr, "captured k %p (%x)\n",captured_k,t);
+  fprintf(stderr, "captured k %p (%ld)\n",captured_k,t);
   return Val_unit;
 }
 
@@ -141,7 +143,7 @@ value dbg_print_trapsp_simple(const value title, const value k)
 {
   const ptrdiff_t t = Long_val(k);
   value * const captured_k = caml_stack_high - t;
-  fprintf(stderr, "%s; k %p (%x)\n",String_val(title),captured_k,t);
+  fprintf(stderr, "%s; k %p (%ld)\n",String_val(title),captured_k,t);
   return Val_unit;
 }
 

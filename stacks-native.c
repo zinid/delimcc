@@ -128,6 +128,8 @@ Thanks to Anthony Tavener for investigation.
 */
 
 
+#define CAML_INTERNALS
+
 #include "misc.h"
 #include "memory.h"
 #include "mlvalues.h"
@@ -604,7 +606,7 @@ value dbg_print_trapsp_simple(const value title, const value k)
 {
   const ptrdiff_t t = Long_val(k);
   value * const captured_k = Highest_stack_addr - t;
-  fprintf(stderr, "%s; k %p (%x)\n",String_val(title),captured_k,t);
+  fprintf(stderr, "%s; k %p (%ld)\n",String_val(title),captured_k,t);
   return Val_unit;
 }
 
@@ -615,7 +617,7 @@ value dbg_print_trapsp(const value k)
   print_gl_stack("dbg_print_trapsp");
   print_exc_trace("dbg_print_trapsp");
   print_stack_trace("dbg_print_trapsp");
-  fprintf(stderr, "captured k %p (%x)\n",captured_k,t);
+  fprintf(stderr, "captured k %p (%ld)\n",captured_k,t);
   return Val_unit;
 }
 

@@ -41,8 +41,6 @@
 # That copy corresponds to the ia32 (x86) platform. For other platforms,
 # you really need a configured OCaml distribution.
 
-OCAMLINCLUDES=./ocaml-byterun-3.11
-
 LIBDIR := $(shell ocamlc -where)
 
 # Richard Mortier <mort@cantab.net>, 2013-03-19
@@ -66,7 +64,7 @@ DESTDIR=
 STDINCLUDES=$(LIBDIR)/caml
 STUBLIBDIR=$(LIBDIR)/stublibs
 CC=gcc
-CFLAGS+=-fPIC -Wall -I$(OCAMLINCLUDES) -I$(STDINCLUDES)
+CFLAGS+=-fPIC -Wall -I$(STDINCLUDES)
 
 # Disable optimization for GCC >= 4.7
 GCC_VERSION=$(shell gcc -dumpversion)

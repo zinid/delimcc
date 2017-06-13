@@ -8,11 +8,14 @@
   a new abstract data type global_data_idx for that purpose. See more comments
   in delimcc.ml.
 
-  $Id$
+  $Id: delim_serialize.c,v 1.1 2017/03/23 10:48:18 oleg Exp oleg $
 
  *------------------------------------------------------------------------
  */
 
+#define CAML_INTERNALS
+
+#include <stdint.h>
 #include <string.h>
 #include "misc.h"
 #include <alloc.h>
@@ -355,7 +358,7 @@ static value abs_rec(value global_data_arr, value v)
   if(Tag_val(v) == Custom_tag && Wosize_val(v) == 2 &&
      strcmp(Custom_ops_val(v)->identifier,"delimcc_gdix") == 0)
   {
-    const int32 i = *((int32 *) Data_custom_val(v));
+    const int32_t i = *((int32_t *) Data_custom_val(v));
     value f;
 #if defined(DEBUG_SER) && DEBUG_SER
     fprintf(stderr, "absolutizing %d\n",i);
@@ -366,7 +369,7 @@ static value abs_rec(value global_data_arr, value v)
     {
       const value f1 = Field(f,1);
       myassert( Is_block(f1) && Wosize_val(f1) == 2 &&
-		*((int32 *) Data_custom_val(f1)) == i);
+		*((int32_t *) Data_custom_val(f1)) == i);
     }
     v = Field(f,0);
     myassert( Is_block(v) && Is_in_heap(v) && Tag_val(v) == Closure_tag );
@@ -483,20 +486,20 @@ value output_delim_value(value global_data_arr,
 
 
 /* Implementing the custom data type global_data_ix
-   The contents is the int32 index in the global data table.
+   The contents is the int32_t index in the global data table.
    Don't forget to invoke global_data_register_custom_ops ()
    somewhere in the initialization code.
 */
 
 static void gdix_serialize(value v, uintnat * wsize_32, uintnat * wsize_64)
 {
-  caml_serialize_int_4((*((int32 *) Data_custom_val(v))));
+  caml_serialize_int_4((*((int32_t *) Data_custom_val(v))));
   *wsize_32 = *wsize_64 = 4;
 }
 
 static uintnat gdix_deserialize(void * dst)
 {
-  *((int32 *) dst) = caml_deserialize_sint_4();
+  *((int32_t *) dst) = caml_deserialize_sint_4();
   return 4;
 }
 
@@ -519,7 +522,7 @@ CAMLexport value global_data_ix_make(value i) /* int->global_data_idx */
 {
   value res = caml_alloc_custom(&global_data_ix_ops, 4, 0, 1);
   myassert( Is_long(i) );
-  (*((int32 *) Data_custom_val(res))) = Long_val(i);
+  (*((int32_t *) Data_custom_val(res))) = Long_val(i);
   return res;
 }
 
