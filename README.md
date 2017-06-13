@@ -1,5 +1,15 @@
-A direct implementation of persistent delimited continuations for byte- and native-code OCaml The delimcc library
-=================================================================================================================
+The delimcc library
+===================
+A direct implementation of persistent delimited continuations for byte- and native-code OCaml
+
+## DISCLAIMER
+
+I'm (@zinid) not the author of the library. I actually barely can understand
+the topic. The original author is [Oleg Kiselyov](http://okmij.org/ftp).
+The reason I maintain this repo is to keep a version control and ease of
+installation from opam, since the author is too... busy(?) to do this.
+Please don't open issues in this repo, I just ignore them. However, PR's
+are welcome.
 
 ## OVERVIEW
 
