@@ -41,9 +41,6 @@
 # That copy corresponds to the ia32 (x86) platform. For other platforms,
 # you really need a configured OCaml distribution.
 
-#OCAMLINCLUDES=../../byterun
-#OCAMLINCLUDES=./ocaml-byterun-3.09
-#OCAMLINCLUDES=./ocaml-byterun-3.10
 OCAMLINCLUDES=./ocaml-byterun-3.11
 
 LIBDIR := $(shell ocamlc -where)
@@ -68,9 +65,15 @@ DESTDIR=
 
 STDINCLUDES=$(LIBDIR)/caml
 STUBLIBDIR=$(LIBDIR)/stublibs
-# CC=$(NATIVECC)
 CC=gcc
-CFLAGS=-fPIC -Wall -I$(OCAMLINCLUDES) -I$(STDINCLUDES) -O2
+CFLAGS+=-fPIC -Wall -I$(OCAMLINCLUDES) -I$(STDINCLUDES)
+
+# Disable optimization for GCC >= 4.7
+GCC_VERSION=$(shell gcc -dumpversion)
+ifeq "4.7" "$(word 2, $(sort 4.7 $(GCC_VERSION)))"
+	CFLAGS+=-O2
+endif
+
 NATIVEFLAGS=-DCAML_NAME_SPACE -DNATIVE_CODE \
        -DTARGET_$(ARCH) -DSYS_$(SYSTEM)
 RANLIB=ranlib
@@ -123,8 +126,7 @@ delimcc.cmo: delimcc.cmi
 
 # When using GCC 4.7, add the flag -fno-ipa-sra
 stacks-native.o: stacks-native.c
-	$(CC) -c $(NATIVEFLAGS) -O2 -fPIC -Wall \
-	-I$(OCAMLINCLUDES) -I$(STDINCLUDES) stacks-native.c
+	$(CC) -c $(NATIVEFLAGS) $(CFLAGS) stacks-native.c
 
 top:	libdelimcc.a delimcc.cma
 	$(OCAMLMKTOP) -o ocamltopcc delimcc.cma
