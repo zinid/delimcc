@@ -203,13 +203,13 @@ value copy_stack_fragment(const value vek1)
 #endif
 
   if (size < Max_young_wosize) {
-    block = alloc(size, 0);
+    block = caml_alloc(size, 0);
     memcpy(&Field(block, 0), tp2, size * sizeof(value));
   } else {
-    block = alloc_shr(size, 0);
+    block = caml_alloc_shr(size, 0);
     mlsize_t i;
     for (i = 0; i < size; i++)
-      initialize(&Field(block, i), tp2[i]);
+      caml_initialize(&Field(block, i), tp2[i]);
   }
 
   /* We check the invariants after the allocation of block, which may
