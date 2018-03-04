@@ -55,7 +55,7 @@
   native-code OCaml, see stacks-native.c. See the latter file for
   justification.
 
-  $Id: stacks.c,v 1.1 2017/03/23 10:53:25 oleg Exp oleg $
+  $Id: stacks.c,v 1.2 2018/02/26 05:31:12 oleg Exp oleg $
 
  *------------------------------------------------------------------------
  */

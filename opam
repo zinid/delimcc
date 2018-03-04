@@ -1,0 +1,15 @@
+opam-version: "1.2"
+maintainer: "xramtsov@gmail.com"
+authors: ["Oleg Kiselyov"]
+homepage: "http://okmij.org/ftp/continuations/implementations.html#caml-shift"
+bug-reports: "https://github.com/zinid/delimcc/issues"
+dev-repo: "https://github.com/zinid/delimcc.git"
+license: "MIT"
+build: [
+  [make "all"]
+  [make "opt"]
+]
+remove: [["ocamlfind" "remove" "delimcc"]]
+depends: ["ocamlfind"]
+install: [make "findlib-install"]
+available: [ ocaml-version >= "4.04.0" ]
