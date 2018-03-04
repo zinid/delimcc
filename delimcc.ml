@@ -146,7 +146,7 @@
  with all needed modules.
 
 
- $Id: delimcc.ml,v 1.7 2006/02/02 01:29:28 oleg Exp $
+ $Id: delimcc.ml,v 1.1 2017/07/11 14:20:11 oleg Exp oleg $
 
 *)
 
@@ -160,7 +160,7 @@ module EK :
           DelimCCE (see below) has no type parameters, so ek doesn't have
           either. 
       *)
-      type ek
+      type ek [@@ocaml.immediate]
 
       (* The copy of the stack, between two ek 
 	 (including the most recent exception frame and excluding the other) 
@@ -194,6 +194,9 @@ module EK :
      *)
      type ek = int
      type ekfragment			(* Abstract *)
+     (* get_ek must not be annotated with noalloc! Otherwise, the stack
+        pointers are not properly set. get_ek depends on getting the
+        OCaml stack pointers! *)
      external get_ek   : unit -> ek = "get_trapsp"
      external reset_ek : ek -> exn -> 'a = "reset_trapsp"
      external dbg_print_ek          : ek -> unit = "dbg_print_trapsp"
@@ -204,14 +207,14 @@ module EK :
      external push_stack_fragment : ekfragment -> exn -> 'a
 	 = "push_stack_fragment"
      external size_stack_fragment : ekfragment -> int
-	 = "size_stack_fragment"
+	 = "size_stack_fragment" [@@noalloc]
      
      external dbg_fatal_error : string -> 'a
 	 = "dbg_fatal_error"
      external dbg_note : string -> unit
 	 = "dbg_note"
 	
-     let rebase_ek ek ekbase ekbasen = 
+     let[@ocaml.inline] rebase_ek ek ekbase ekbasen = 
        assert (ek >= ekbase); (ek - ekbase) + ekbasen
    end
 
@@ -301,7 +304,8 @@ let new_prompt () : 'a prompt =
   {mbox = ref mbox_empty; mark = ref ()}
 
 (* The wrapper for the body; captured in the continuation *)
-let push_prompt_aux (p : 'a prompt) (body : unit -> 'a) : 'any =
+let[@inline never] 
+  push_prompt_aux (p : 'a prompt) (body : unit -> 'a) : 'any =
   let () = ptop := {pfr_mark = p.mark; pfr_ek = get_ek ()} :: (!ptop) in
   let res = body () in
   p.mbox := (fun () -> res);
@@ -380,7 +384,8 @@ let push_delim_subcont (sk : ('a,'b) subcont) (m : unit -> 'a) : 'b =
    introduced by the try form.
 *)
 
-let take_subcont_aux (p : 'b prompt) (f : ('a,'b) subcont -> unit -> 'b) 
+let[@inline never] 
+  take_subcont_aux (p : 'b prompt) (f : ('a,'b) subcont -> unit -> 'b) 
     (pa : 'a prompt) ek subcontchain  =
   let ekfrag = copy_stack_fragment ek in
   p.mbox := 
@@ -401,7 +406,8 @@ let take_subcont (p : 'b prompt) (f : ('a,'b) subcont -> unit -> 'b) : 'a =
   | e -> dbg_fatal_error "take_subcont: can't happen"
 
 
-let push_subcont_aux (sk : ('a,'b) subcont) (m : unit -> 'a)  =
+let[@inline never] 
+  push_subcont_aux (sk : ('a,'b) subcont) (m : unit -> 'a)  =
   let base = sk.subcont_bs in
   let ek = get_ek () in
   List.iter (fun pframe ->
@@ -428,7 +434,8 @@ let push_subcont (sk : ('a,'b) subcont) (m : unit -> 'a) : 'b =
    rather than via push_prompt/control combination...
 *)
 
-let push_delim_subcont_aux (sk : ('a,'b) subcont) (m : unit -> 'a) : 'any =
+let[@inline never] 
+ push_delim_subcont_aux (sk : ('a,'b) subcont) (m : unit -> 'a) : 'any =
   let pb = sk.subcont_pb in
   let base = sk.subcont_bs in
   let ek = get_ek () in
@@ -611,7 +618,7 @@ let init_global_closure reference_data =
             shift p0 (fun f -> 
 	      let _ = relativitize (Obj.repr f) true in
 	      f ());
-            shift p0 (fun f -> relativitize (Obj.repr f) true); 
+            ignore (shift p0 (fun f -> relativitize (Obj.repr f) true)); 
             abort p0 (Obj.repr 0)) in
   prerr_endline "Serialization initialized"
 

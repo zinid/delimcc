@@ -6,8 +6,7 @@
   This code deals with exception frames and stack fragments
   between two exception frames in NATIVE-code OCaml.
 
-  The code is written for the i386 architecture (although it may work for
-  ia64 and amd64). 
+  The code is written for the x86 and amd64 architecture. 
 
   This file implements two abstract data types: |ek| for exception frame
   pointers, and |ekfragment| for the stack fragment between two exception
@@ -124,7 +123,16 @@ NB!! Although this code can be compiled with -O2 by GCC 4.2.1, 4.5 and
 disable optimizations, or do
 	-O2 -fno-ipa-sra
 Thanks to Anthony Tavener for investigation.
+However,
 
+Ivan Gotovchits on Jun  5, 2017 pointed out the use of attribute to disable the
+optimizations.
+https://gcc.gnu.org/onlinedocs/gcc/Function-Specific-Option-Pragmas.html#Function-Specific-Option-Pragmas
+https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#Common-Function-Attributes
+
+So, the present code uses appropriate attributes that prevent the inlining
+and movements of the critical function, as explained below. So, the
+present code is safe to compile with optimizations on.
 */
 
 
@@ -166,8 +174,12 @@ extern void caml_raise_exception (const value bucket) Noreturn;
    asmrun/signals_asm.c, but it is not exported.
    The following is a good approximation, as the base for
    computing offsets. It makes offsets generally small.
+
+Before, I had
+   #define Highest_stack_addr ((value*)(-1024))
+Now, the it seems the top of stack is available...
 */
-#define Highest_stack_addr ((value*)(-1024))
+#define Highest_stack_addr ((value*)caml_top_of_stack)
 
 /* Under no circumstances EVER EVER EVER should assert be disabled!!! */
 
@@ -432,6 +444,10 @@ static void * naive_alloc(const size_t size)
    We assume that stack grows to the lower addresses, hence
    tp1 > tp2.
 */
+static ekfragment_t new_ekfragment_t(const char * tp1,
+				     const char * tp2)
+   __attribute__((returns_nonnull,nonnull));
+
 static ekfragment_t new_ekfragment_t(const char * tp1,
 				     const char * tp2)
 {
@@ -847,12 +863,14 @@ value copy_stack_fragment(const value vek1)
 /* As was explained above, the whole point of this function
    is to have a separate frame from push_stack_fragment.
    So, push_stack_fragment_really must not be inlined!
+   We add returns_twice argument to prevent various optimizations like inlining
+   or tail-call optimizations of that function.
 */
 static void push_stack_fragment_really(ekfragment_t ekp, 
 				       char * reserved_area,
 				       const frame_descr * fdtop,
 				       const value delimcc_exc)
-  __attribute__((noinline));
+  __attribute__((noinline,no_icf,no_instrument_function,noclone,returns_twice));
 
 
 value push_stack_fragment(const value ekfragment, const value delimcc_exc)
